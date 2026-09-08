@@ -11,6 +11,9 @@ A simple PHP application with user authentication, a dashboard, a product showca
 - Admin can create, update, and delete products with image upload
 - Product fields: name, short description, detailed description, image, and price
 
+- Create uploads folder in public 
+ eg: public/uploads
+ 
 ## Default admin account
 - Email: admin@demo.com
 - Password: admin123
