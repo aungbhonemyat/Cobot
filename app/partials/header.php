@@ -12,13 +12,17 @@ $errorMessage = flash('error');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'Shop Admin'; ?></title>
+    <link rel="icon" type="image/png" href="/uploads/items/ABM.png">
     <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
     <header class="topbar">
         <div class="container nav-wrap">
             <div class="brand">
-                <a href="/dashboard.php">ABM MarketBoard</a>
+                <a href="/dashboard.php" class="brand-link">
+                    <img src="/uploads/items/ABM.png" alt="ABM MarketBoard" class="brand-logo">
+                    <span class="brand-text">ABM MarketBoard</span>
+                </a>
             </div>
             <button class="mobile-menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">
                 <span></span><span></span><span></span>
