@@ -3,9 +3,10 @@ require_once __DIR__ . '/../app/helpers.php';
 requireLogin();
 
 $user = currentUser();
+$isAdmin = strtolower((string) ($user['role'] ?? '')) === 'admin';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['clear_messages']) && (($user['role'] ?? '') === 'admin')) {
+    if (isset($_POST['clear_messages']) && $isAdmin) {
         clearMessages();
         flash('success', 'All messages cleared.');
         redirect('/dashboard.php');
@@ -13,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($_POST['chat_message'])) {
         $message = trim($_POST['chat_message'] ?? '');
-        $isAnnouncement = !empty($_POST['announce']) && (($user['role'] ?? '') === 'admin');
+        $isAnnouncement = !empty($_POST['announce']) && $isAdmin;
 
         if ($message === '') {
             flash('error', 'Message cannot be empty.');
@@ -46,7 +47,7 @@ include __DIR__ . '/../app/partials/header.php';
 
 <div class="dashboard-layout">
     <main class="dashboard-main">
-        <?php if (($user['role'] ?? '') === 'admin'): ?>
+        <?php if ($isAdmin): ?>
             <div class="stats-grid">
                 <article class="stat-card">
                     <span>Total users</span>
@@ -93,41 +94,46 @@ include __DIR__ . '/../app/partials/header.php';
     </main>
 
     <aside class="dashboard-sidebar">
-        <section class="chat-panel">
+        <section class="chat-panel" id="chatPanel">
             <div class="chat-header">
                 <h2>Conversation</h2>
-                <?php if (($user['role'] ?? '') === 'admin'): ?>
-                    <form method="post" class="inline-form">
-                        <button type="submit" name="clear_messages" class="clear-btn">Clear</button>
-                    </form>
-                <?php endif; ?>
+                <div class="chat-actions">
+                    <button type="button" class="chat-toggle" aria-label="Minimize chat" aria-expanded="true">Minimize</button>
+                    <?php if ($isAdmin): ?>
+                        <form method="post" class="inline-form" onsubmit="return confirm('Clear all chat messages? This cannot be undone.');">
+                            <button type="submit" name="clear_messages" value="1" class="clear-btn">Clear</button>
+                        </form>
+                    <?php endif; ?>
+                </div>
             </div>
 
-            <form method="post" class="chat-form">
-                <?php if (($user['role'] ?? '') === 'admin'): ?>
-                    <label class="checkbox-row">
-                        <input type="checkbox" name="announce" value="1">
-                        <span>Send as announcement</span>
-                    </label>
-                <?php endif; ?>
+            <div class="chat-body">
+                <form method="post" class="chat-form">
+                    <?php if ($isAdmin): ?>
+                        <label class="checkbox-row">
+                            <input type="checkbox" name="announce" value="1">
+                            <span>Send as announcement</span>
+                        </label>
+                    <?php endif; ?>
 
-                <textarea name="chat_message" rows="3" placeholder="<?= (($user['role'] ?? '') === 'admin') ? 'Type an announcement or message...' : 'Write a message to the team...' ?>" required></textarea>
-                <button type="submit" class="primary-btn">Send</button>
-            </form>
+                    <textarea name="chat_message" rows="3" placeholder="<?= ($isAdmin) ? 'Type an announcement or message...' : 'Write a message to the team...' ?>" required></textarea>
+                    <button type="submit" class="primary-btn">Send</button>
+                </form>
 
-            <div class="chat-box">
-                <?php foreach ($messages as $message): ?>
-                    <article class="chat-message <?= ((int) ($message['is_announcement'] ?? 0)) === 1 ? 'announcement' : '' ?> <?= ((int) ($message['sender_id'] ?? 0) === (int) $user['id']) ? 'mine' : '' ?>">
-                        <div class="chat-meta">
-                            <strong><?= e($message['sender_name']) ?></strong>
-                            <?php if ((int) ($message['is_announcement'] ?? 0) === 1): ?>
-                                <span class="chat-tag">Admin</span>
-                            <?php endif; ?>
-                            <span class="chat-time"><?= date('M d, Y h:i A', strtotime($message['created_at'])) ?></span>
-                        </div>
-                        <p><?= nl2br(e($message['message'])) ?></p>
-                    </article>
-                <?php endforeach; ?>
+                <div class="chat-box">
+                    <?php foreach ($messages as $message): ?>
+                        <article class="chat-message <?= ((int) ($message['is_announcement'] ?? 0)) === 1 ? 'announcement' : '' ?> <?= ((int) ($message['sender_id'] ?? 0) === (int) $user['id']) ? 'mine' : '' ?>">
+                            <div class="chat-meta">
+                                <strong><?= e($message['sender_name']) ?></strong>
+                                <?php if ((int) ($message['is_announcement'] ?? 0) === 1): ?>
+                                    <span class="chat-tag">Admin</span>
+                                <?php endif; ?>
+                                <span class="chat-time"><?= date('M d, Y h:i A', strtotime($message['created_at'])) ?></span>
+                            </div>
+                            <p><?= nl2br(e($message['message'])) ?></p>
+                        </article>
+                    <?php endforeach; ?>
+                </div>
             </div>
         </section>
     </aside>

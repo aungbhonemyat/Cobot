@@ -76,6 +76,17 @@ $errorMessage = flash('error');
                 toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
             });
         }
+
+        var chatToggle = document.querySelector('.chat-toggle');
+        var chatPanel = document.getElementById('chatPanel');
+        if (chatToggle && chatPanel) {
+            chatToggle.addEventListener('click', function () {
+                var isCollapsed = chatPanel.classList.toggle('collapsed');
+                chatToggle.textContent = isCollapsed ? 'Maximize' : 'Minimize';
+                chatToggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+                chatToggle.setAttribute('aria-label', isCollapsed ? 'Maximize chat' : 'Minimize chat');
+            });
+        }
     });
     </script>
 
